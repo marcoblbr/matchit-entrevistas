@@ -30,7 +30,7 @@
       linear-gradient(180deg,var(--ground),var(--ground-2));
     min-height:100dvh;
   }
-  .page{max-width:1000px;margin:0 auto;padding:clamp(16px,4vw,40px)}
+  .page{max-width:100%;margin:0;padding:clamp(16px,3vw,40px)}
 
   .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
   .title-wrap{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -49,8 +49,10 @@
     padding:12px 16px;font-weight:700;font-size:15px;cursor:pointer;user-select:none}
   .plan-head::before{content:"▾";display:inline-block;font-size:12px;color:rgba(232,238,251,.75);transition:transform .15s}
   .plan.collapsed .plan-head::before{transform:rotate(-90deg)}
-  .plan.collapsed .scroll{display:none}
   .plan-head .count{margin-left:auto;font-weight:500;font-size:12.5px;color:rgba(232,238,251,.7)}
+  /* Recolher/expandir suave via max-height (a altura é calculada no JS): a tabela abre/fecha
+     no próprio lugar, o cabeçalho não sai da posição e a página não "pula". */
+  .plan-body{overflow:hidden;transition:max-height .24s ease}
   .tone-0 .plan-head{background:linear-gradient(90deg,rgba(23,126,150,.5),rgba(23,126,150,.14))}
   .tone-1 .plan-head{background:linear-gradient(90deg,rgba(44,122,78,.54),rgba(44,122,78,.16))}
   .tone-2 .plan-head{background:linear-gradient(90deg,rgba(168,94,34,.54),rgba(168,94,34,.16))}
@@ -58,7 +60,7 @@
   .tone-4 .plan-head{background:linear-gradient(90deg,rgba(162,60,90,.56),rgba(162,60,90,.18))}
   .tone-5 .plan-head{background:linear-gradient(90deg,rgba(76,94,164,.56),rgba(76,94,164,.18))}
 
-  .scroll{overflow-x:auto}
+  .scroll{overflow-x:auto;overflow-y:hidden}
   table{width:100%;border-collapse:collapse;min-width:520px}
   thead th{text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
     font-weight:600;padding:14px 12px 8px;white-space:nowrap}
@@ -122,7 +124,6 @@
       <div class="title-wrap"><h1>Agendamentos</h1><span class="ro-pill">somente leitura</span></div>
       <div class="updated"><span class="dot" aria-hidden="true"></span><span id="updated-at"></span></div>
     </div>
-    <ul class="legend" id="legend"></ul>
     <div id="plans"></div>
     <footer>
       <span>Gerado pelo <span class="brand"><span class="b">match</span><span class="t">&lt;/IT&gt;</span></span></span>
@@ -143,7 +144,7 @@
     </div>
   </div>
 
-  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"n9iid4QWCPA2hwRVFFeaeg==","iv":"okJTdqTBeNp7Ayrn","ct":"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"}</script>
+  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"O1RRtBCeylYX5QVbuLGUvg==","iv":"E+TivT4fXP9nK7fF","ct":"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"}</script>
   <script>
   (function(){
     "use strict";
@@ -191,14 +192,6 @@
 
     function render(data){
       document.getElementById("updated-at").textContent = "Atualizado em " + (data.generatedAtLabel||"");
-      // legenda com os status presentes
-      var present={}, order=["combinando_horario","fup","agendado","realizado","reagendando","cancelado"];
-      (data.plans||[]).forEach(function(pl){ (pl.rows||[]).forEach(function(r){ if(r.status) present[r.status]=r.statusLabel||r.status; }); });
-      var legendHtml = order.filter(function(s){return present[s];}).map(function(s){
-        return '<li><span class="swatch sw-'+(STATUS_CLASS[s]||"neutro")+'"></span>'+esc(present[s])+'</li>';
-      }).join("");
-      document.getElementById("legend").innerHTML = legendHtml;
-
       var cols=data.columns||["nome"];
       var head="<tr>"+cols.map(function(c){return '<th class="col-'+c+'">'+esc(COL_LABEL[c]||c)+'</th>';}).join("")+"</tr>";
       var html=(data.plans||[]).map(function(pl){
@@ -208,14 +201,29 @@
         var n=(pl.rows||[]).length;
         return '<section class="plan tone-'+(pl.tone||0)+'">'
           +'<div class="plan-head">'+esc(pl.name)+'<span class="count">'+n+(n===1?" contato":" contatos")+'</span></div>'
-          +'<div class="scroll"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div></section>';
+          +'<div class="plan-body"><div class="scroll"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div></div></section>';
       }).join("");
       var plansEl = document.getElementById("plans");
       plansEl.innerHTML = html || '<p style="color:var(--muted)">Nenhum agendamento nesta seleção.</p>';
-      // Clicar no título do plano recolhe/expande (começa tudo expandido).
+      // Clicar no título do plano recolhe/expande (começa tudo expandido). Anima a altura
+      // no lugar, sem "pular" — o cabeçalho clicado permanece na mesma posição.
+      function togglePlanSection(section){
+        var body = section.querySelector(".plan-body");
+        if (!body) { section.classList.toggle("collapsed"); return; }
+        if (section.classList.contains("collapsed")) {
+          section.classList.remove("collapsed");
+          body.style.maxHeight = body.scrollHeight + "px";
+          setTimeout(function(){ if(!section.classList.contains("collapsed")) body.style.maxHeight=""; }, 280);
+        } else {
+          body.style.maxHeight = body.scrollHeight + "px";
+          body.getBoundingClientRect(); // força reflow p/ a transição pegar
+          section.classList.add("collapsed");
+          body.style.maxHeight = "0px";
+        }
+      }
       plansEl.addEventListener("click", function(ev){
         var head = ev.target.closest(".plan-head");
-        if (head && head.parentElement) head.parentElement.classList.toggle("collapsed");
+        if (head && head.parentElement) togglePlanSection(head.parentElement);
       });
       gate.hidden=true; app.classList.remove("hidden");
     }
