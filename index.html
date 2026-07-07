@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Agendamentos</title>
+<style>
+  :root{
+    --ground:#0a111c; --ground-2:#0c1523; --panel:#101d2e; --panel-2:#0e1a29;
+    --line:rgba(176,201,232,.14); --line-2:rgba(176,201,232,.22);
+    --ink:#e8eefb; --muted:#93a6c4; --muted-2:#6f829f;
+    --teal:#5cc7e6; --brand:#f2662f;
+    --st-agendado:rgba(36,102,214,.46); --st-agendado-line:rgba(128,174,240,.55);
+    --st-realizado:rgba(39,128,91,.52); --st-realizado-line:rgba(120,214,170,.5);
+    --st-fup:rgba(168,94,34,.55); --st-fup-line:rgba(255,190,129,.5);
+    --st-combinando:rgba(24,138,120,.5); --st-combinando-line:rgba(120,224,205,.45);
+    --st-cancelado:rgba(150,52,67,.55); --st-cancelado-line:rgba(232,142,158,.45);
+    --st-reagendando:rgba(129,72,171,.5); --st-reagendando-line:rgba(201,152,236,.45);
+    --st-neutro:rgba(108,116,130,.5); --st-neutro-line:rgba(176,190,214,.4);
+    --font:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:var(--font);color:var(--ink);
+    background:
+      radial-gradient(1100px 520px at 82% -8%, rgba(23,126,150,.20), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(31,64,72,.28), transparent 55%),
+      linear-gradient(180deg,var(--ground),var(--ground-2));
+    min-height:100dvh;
+  }
+  .page{max-width:1000px;margin:0 auto;padding:clamp(16px,4vw,40px)}
+
+  .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+  .title-wrap{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:clamp(20px,3.4vw,27px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .ro-pill{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:#bfe7ff;
+    border:1px solid rgba(92,199,230,.4);background:rgba(23,90,116,.35);padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .updated{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#3ad29a;box-shadow:0 0 0 3px rgba(58,210,154,.18)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 22px;padding:0;list-style:none}
+  .legend li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+  .swatch{width:22px;height:13px;border-radius:5px;border:1px solid var(--line-2)}
+
+  .plan{margin-bottom:18px}
+  .plan-head{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);border-radius:12px;
+    padding:12px 16px;font-weight:700;font-size:15px}
+  .plan-head .count{margin-left:auto;font-weight:500;font-size:12.5px;color:rgba(232,238,251,.7)}
+  .tone-0 .plan-head{background:linear-gradient(90deg,rgba(23,126,150,.5),rgba(23,126,150,.14))}
+  .tone-1 .plan-head{background:linear-gradient(90deg,rgba(44,122,78,.54),rgba(44,122,78,.16))}
+  .tone-2 .plan-head{background:linear-gradient(90deg,rgba(168,94,34,.54),rgba(168,94,34,.16))}
+  .tone-3 .plan-head{background:linear-gradient(90deg,rgba(129,72,171,.54),rgba(129,72,171,.16))}
+  .tone-4 .plan-head{background:linear-gradient(90deg,rgba(162,60,90,.56),rgba(162,60,90,.18))}
+  .tone-5 .plan-head{background:linear-gradient(90deg,rgba(76,94,164,.56),rgba(76,94,164,.18))}
+
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:520px}
+  thead th{text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding:14px 12px 8px;white-space:nowrap}
+  tbody td{padding:11px 12px;border-top:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+  tbody tr:hover td{background:rgba(255,255,255,.02)}
+  .c-nome{font-weight:600}
+  .c-emp,.c-tel{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums;text-align:center;color:var(--muted)}
+  .c-contato,.c-reuniao{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+  .c-reuniao.set{color:var(--ink)}
+  .dash{color:var(--muted-2)}
+  th.col-dias,td.col-dias{text-align:center}
+
+  .st{display:inline-block;padding:5px 12px;border-radius:8px;font-size:12.5px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+  .st.agendado{background:var(--st-agendado);border-color:var(--st-agendado-line);color:#dbe8ff}
+  .st.realizado{background:var(--st-realizado);border-color:var(--st-realizado-line);color:#dcfff0}
+  .st.fup{background:var(--st-fup);border-color:var(--st-fup-line);color:#ffe6cf}
+  .st.combinando{background:var(--st-combinando);border-color:var(--st-combinando-line);color:#d6fff5}
+  .st.cancelado{background:var(--st-cancelado);border-color:var(--st-cancelado-line);color:#ffe0e6}
+  .st.reagendando{background:var(--st-reagendando);border-color:var(--st-reagendando-line);color:#f0e2ff}
+  .st.neutro{background:var(--st-neutro);border-color:var(--st-neutro-line);color:#eef3fb}
+  .sw-agendado{background:var(--st-agendado);border-color:var(--st-agendado-line)}
+  .sw-realizado{background:var(--st-realizado);border-color:var(--st-realizado-line)}
+  .sw-fup{background:var(--st-fup);border-color:var(--st-fup-line)}
+  .sw-combinando{background:var(--st-combinando);border-color:var(--st-combinando-line)}
+  .sw-cancelado{background:var(--st-cancelado);border-color:var(--st-cancelado-line)}
+  .sw-reagendando{background:var(--st-reagendando);border-color:var(--st-reagendando-line)}
+  .sw-neutro{background:var(--st-neutro);border-color:var(--st-neutro-line)}
+
+  footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted-2);
+    display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+  .brand{font-weight:700;color:var(--ink)}
+  .brand .b,.brand .t{color:var(--brand)}
+
+  .gate{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;
+    background:rgba(6,11,19,.9);backdrop-filter:blur(7px)}
+  .gate[hidden]{display:none}
+  .gate-card{width:min(380px,100%);background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line-2);border-radius:18px;padding:26px 24px 22px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.7);text-align:center}
+  .lock{font-size:26px;line-height:1}
+  .gate-card h2{margin:12px 0 4px;font-size:18px}
+  .gate-card p{margin:0 0 18px;font-size:13px;color:var(--muted)}
+  .gate form{display:flex;flex-direction:column;gap:10px}
+  .gate input[type=password]{width:100%;background:rgba(6,11,19,.6);border:1px solid var(--line-2);border-radius:11px;
+    color:var(--ink);font:inherit;font-size:15px;padding:12px 14px;text-align:center}
+  .gate input[type=password]:focus-visible{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+  .gate button{appearance:none;border:0;border-radius:11px;cursor:pointer;font:inherit;font-weight:700;font-size:14.5px;
+    padding:12px 14px;color:#04121a;background:linear-gradient(180deg,#7fd6ee,#49b7d8)}
+  .gate button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .gate .remember{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;color:var(--muted);margin-top:2px}
+  .gate .err{margin-top:12px;font-size:12.5px;color:#ff9db0;min-height:16px}
+  .hidden{display:none!important}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+  <main class="page hidden" id="app">
+    <div class="top">
+      <div class="title-wrap"><h1>Agendamentos</h1><span class="ro-pill">somente leitura</span></div>
+      <div class="updated"><span class="dot" aria-hidden="true"></span><span id="updated-at"></span></div>
+    </div>
+    <ul class="legend" id="legend"></ul>
+    <div id="plans"></div>
+    <footer>
+      <span>Gerado pelo <span class="brand"><span class="b">match</span><span class="t">&lt;/IT&gt;</span></span></span>
+      <span>·</span><span>foto do último “Sincronizar”</span>
+    </footer>
+  </main>
+
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <div class="lock" aria-hidden="true">🔒</div>
+      <h2>Agendamentos</h2>
+      <p>Digite a senha para visualizar.</p>
+      <form id="gate-form" autocomplete="off">
+        <input id="gate-input" type="password" placeholder="Senha" aria-label="Senha" autocomplete="current-password">
+        <button type="submit" id="gate-btn">Ver agendamentos</button>
+        <label class="remember"><input type="checkbox" id="gate-remember"> Lembrar neste dispositivo</label>
+      </form>
+      <div class="err" id="gate-err" role="alert"></div>
+    </div>
+  </div>
+
+  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"SXWVdgbg0jh7a86prPrdCg==","iv":"vMgp3p7S25zXxzOk","ct":"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"}</script>
+  <script>
+  (function(){
+    "use strict";
+    var LS_KEY = "matchit:viewerPass";
+    var COL_LABEL = {nome:"Nome",empresa:"Empresa",telefone:"Telefone",status:"Status",contato:"Contato",dias:"Dias",reuniao:"Reunião"};
+    var STATUS_CLASS = {agendado:"agendado",realizado:"realizado",fup:"fup",combinando_horario:"combinando",cancelado:"cancelado",reagendando:"reagendando"};
+
+    var gate=document.getElementById("gate"), app=document.getElementById("app");
+    var form=document.getElementById("gate-form"), input=document.getElementById("gate-input");
+    var err=document.getElementById("gate-err"), remember=document.getElementById("gate-remember"), btn=document.getElementById("gate-btn");
+
+    function b64ToBytes(b64){ var bin=atob(b64), a=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i); return a; }
+    function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+
+    function diasSince(d){
+      var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(d||""); if(!m) return "";
+      var start=Date.UTC(+m[3],+m[2]-1,+m[1]), now=new Date(), today=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+      var n=Math.floor((today-start)/86400000); return (!isFinite(n)||n<0)?0:n;
+    }
+    function fmtReuniao(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso||""); return m?(m[3]+"/"+m[2]+"/"+m[1]+", "+m[4]+":"+m[5]):""; }
+
+    async function decrypt(password){
+      var p=JSON.parse(document.getElementById("enc").textContent);
+      var salt=b64ToBytes(p.salt), iv=b64ToBytes(p.iv), ct=b64ToBytes(p.ct);
+      var km=await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+      var key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:p.iter,hash:"SHA-256"}, km, {name:"AES-GCM",length:256}, false, ["decrypt"]);
+      var buf=await crypto.subtle.decrypt({name:"AES-GCM",iv:iv}, key, ct);
+      return JSON.parse(new TextDecoder().decode(buf));
+    }
+
+    function renderCell(col, row){
+      if(col==="nome") return '<td class="c-nome">'+esc(row.nome)+'</td>';
+      if(col==="empresa") return '<td class="c-emp">'+esc(row.empresa||"")+'</td>';
+      if(col==="telefone") return '<td class="c-tel">'+esc(row.telefone||"")+'</td>';
+      if(col==="status"){
+        if(!row.status) return '<td></td>';
+        var cls=STATUS_CLASS[row.status]||"neutro";
+        return '<td><span class="st '+cls+'">'+esc(row.statusLabel||row.status)+'</span></td>';
+      }
+      if(col==="contato") return '<td class="c-contato">'+(row.contato?esc(row.contato):'<span class="dash">—</span>')+'</td>';
+      if(col==="dias"){ var d=diasSince(row.contato); return '<td class="num col-dias">'+(d===""?"":esc(d))+'</td>'; }
+      if(col==="reuniao"){ var r=fmtReuniao(row.reuniao); return '<td class="c-reuniao'+(r?" set":"")+'">'+(r?esc(r):'<span class="dash">—</span>')+'</td>'; }
+      return '<td></td>';
+    }
+
+    function render(data){
+      document.getElementById("updated-at").textContent = "Atualizado em " + (data.generatedAtLabel||"");
+      // legenda com os status presentes
+      var present={}, order=["combinando_horario","fup","agendado","realizado","reagendando","cancelado"];
+      (data.plans||[]).forEach(function(pl){ (pl.rows||[]).forEach(function(r){ if(r.status) present[r.status]=r.statusLabel||r.status; }); });
+      var legendHtml = order.filter(function(s){return present[s];}).map(function(s){
+        return '<li><span class="swatch sw-'+(STATUS_CLASS[s]||"neutro")+'"></span>'+esc(present[s])+'</li>';
+      }).join("");
+      document.getElementById("legend").innerHTML = legendHtml;
+
+      var cols=data.columns||["nome"];
+      var head="<tr>"+cols.map(function(c){return '<th class="col-'+c+'">'+esc(COL_LABEL[c]||c)+'</th>';}).join("")+"</tr>";
+      var html=(data.plans||[]).map(function(pl){
+        var body=(pl.rows||[]).map(function(row){
+          return "<tr>"+cols.map(function(c){return renderCell(c,row);}).join("")+"</tr>";
+        }).join("");
+        var n=(pl.rows||[]).length;
+        return '<section class="plan tone-'+(pl.tone||0)+'">'
+          +'<div class="plan-head">'+esc(pl.name)+'<span class="count">'+n+(n===1?" contato":" contatos")+'</span></div>'
+          +'<div class="scroll"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div></section>';
+      }).join("");
+      document.getElementById("plans").innerHTML = html || '<p style="color:var(--muted)">Nenhum agendamento nesta seleção.</p>';
+      gate.hidden=true; app.classList.remove("hidden");
+    }
+
+    async function attempt(password, fromStorage){
+      err.textContent=""; btn.disabled=true;
+      try{
+        var data=await decrypt(password);
+        if(remember && remember.checked || fromStorage){ try{ localStorage.setItem(LS_KEY, password); }catch(e){} }
+        render(data);
+      }catch(e){
+        btn.disabled=false;
+        if(fromStorage){ try{ localStorage.removeItem(LS_KEY); }catch(_){}
+          return; }
+        err.textContent="Senha incorreta.";
+        input.value=""; input.focus();
+      }
+    }
+
+    if(!window.crypto || !crypto.subtle){
+      err.textContent="Seu navegador não suporta a descriptografia (use HTTPS).";
+    }
+    form.addEventListener("submit", function(e){ e.preventDefault(); if(input.value) attempt(input.value,false); });
+
+    var saved=null; try{ saved=localStorage.getItem(LS_KEY); }catch(e){}
+    if(saved){ if(remember) remember.checked=true; attempt(saved,true); }
+    setTimeout(function(){ input.focus(); },40);
+  })();
+  </script>
+</body>
+</html>
