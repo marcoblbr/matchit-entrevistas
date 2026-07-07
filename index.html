@@ -46,7 +46,10 @@
 
   .plan{margin-bottom:18px}
   .plan-head{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);border-radius:12px;
-    padding:12px 16px;font-weight:700;font-size:15px}
+    padding:12px 16px;font-weight:700;font-size:15px;cursor:pointer;user-select:none}
+  .plan-head::before{content:"▾";display:inline-block;font-size:12px;color:rgba(232,238,251,.75);transition:transform .15s}
+  .plan.collapsed .plan-head::before{transform:rotate(-90deg)}
+  .plan.collapsed .scroll{display:none}
   .plan-head .count{margin-left:auto;font-weight:500;font-size:12.5px;color:rgba(232,238,251,.7)}
   .tone-0 .plan-head{background:linear-gradient(90deg,rgba(23,126,150,.5),rgba(23,126,150,.14))}
   .tone-1 .plan-head{background:linear-gradient(90deg,rgba(44,122,78,.54),rgba(44,122,78,.16))}
@@ -123,7 +126,6 @@
     <div id="plans"></div>
     <footer>
       <span>Gerado pelo <span class="brand"><span class="b">match</span><span class="t">&lt;/IT&gt;</span></span></span>
-      <span>·</span><span>foto do último “Sincronizar”</span>
     </footer>
   </main>
 
@@ -141,7 +143,7 @@
     </div>
   </div>
 
-  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"g1VRx6cG58Sh3h0Gm0KKXA==","iv":"FdtS5RUkZsYdWeJM","ct":"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"}</script>
+  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"n9iid4QWCPA2hwRVFFeaeg==","iv":"okJTdqTBeNp7Ayrn","ct":"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"}</script>
   <script>
   (function(){
     "use strict";
@@ -208,7 +210,13 @@
           +'<div class="plan-head">'+esc(pl.name)+'<span class="count">'+n+(n===1?" contato":" contatos")+'</span></div>'
           +'<div class="scroll"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div></section>';
       }).join("");
-      document.getElementById("plans").innerHTML = html || '<p style="color:var(--muted)">Nenhum agendamento nesta seleção.</p>';
+      var plansEl = document.getElementById("plans");
+      plansEl.innerHTML = html || '<p style="color:var(--muted)">Nenhum agendamento nesta seleção.</p>';
+      // Clicar no título do plano recolhe/expande (começa tudo expandido).
+      plansEl.addEventListener("click", function(ev){
+        var head = ev.target.closest(".plan-head");
+        if (head && head.parentElement) head.parentElement.classList.toggle("collapsed");
+      });
       gate.hidden=true; app.classList.remove("hidden");
     }
 
