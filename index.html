@@ -22,9 +22,14 @@
   }
   *{box-sizing:border-box}
   /* Reserva sempre o espaço da barra de rolagem: a largura não muda quando a barra
-     aparece/some ao recolher/expandir, então os retângulos não se deslocam. */
-  html{scrollbar-gutter:stable}
+     aparece/some ao recolher/expandir, então os retângulos não se deslocam.
+     A barra/gutter usa a cor do fundo pra não gerar aquela faixa branca. */
+  html{scrollbar-gutter:stable;background:var(--ground);scrollbar-color:rgba(176,201,232,.22) var(--ground)}
   html,body{margin:0}
+  ::-webkit-scrollbar{width:12px;height:12px}
+  ::-webkit-scrollbar-track{background:var(--ground)}
+  ::-webkit-scrollbar-thumb{background:rgba(176,201,232,.20);border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(176,201,232,.32)}
   body{
     font-family:var(--font);color:var(--ink);
     background:
@@ -40,6 +45,12 @@
   h1{font-size:clamp(20px,3.4vw,27px);margin:0;letter-spacing:-.01em;text-wrap:balance}
   .ro-pill{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:#bfe7ff;
     border:1px solid rgba(92,199,230,.4);background:rgba(23,90,116,.35);padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .refresh-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+    border:1px solid var(--line-2);border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;
+    transition:color .15s,border-color .15s}
+  .refresh-btn:hover{color:var(--ink);border-color:var(--teal)}
+  .refresh-btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .refresh-btn svg{width:15px;height:15px}
   .updated{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
   .dot{width:7px;height:7px;border-radius:50%;background:#3ad29a;box-shadow:0 0 0 3px rgba(58,210,154,.18)}
 
@@ -49,7 +60,7 @@
 
   .plan{margin-bottom:18px}
   .plan-head{display:flex;align-items:center;gap:10px;border:1px solid var(--line-2);border-radius:12px;
-    padding:12px 16px;font-weight:700;font-size:15px;cursor:pointer;user-select:none}
+    padding:13px 16px;font-weight:700;font-size:16px;cursor:pointer;user-select:none}
   .plan-head::before{content:"▾";display:inline-block;font-size:12px;color:rgba(232,238,251,.75);transition:transform .15s}
   .plan.collapsed .plan-head::before{transform:rotate(-90deg)}
   .plan-head .count{margin-left:auto;font-weight:500;font-size:12.5px;color:rgba(232,238,251,.7)}
@@ -65,9 +76,9 @@
 
   .scroll{overflow-x:auto;overflow-y:hidden}
   table{width:100%;border-collapse:collapse;min-width:520px}
-  thead th{text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
-    font-weight:600;padding:14px 12px 8px;white-space:nowrap}
-  tbody td{padding:11px 12px;border-top:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+  thead th{text-align:left;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
+    font-weight:600;padding:15px 12px 9px;white-space:nowrap}
+  tbody td{padding:13px 12px;border-top:1px solid var(--line);font-size:15px;vertical-align:middle}
   tbody tr:hover td{background:rgba(255,255,255,.02)}
   .c-nome{font-weight:600}
   .c-emp,.c-tel{color:var(--muted)}
@@ -77,7 +88,7 @@
   .dash{color:var(--muted-2)}
   th.col-dias,td.col-dias{text-align:center}
 
-  .st{display:inline-block;padding:5px 12px;border-radius:8px;font-size:12.5px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+  .st{display:inline-block;padding:5px 12px;border-radius:8px;font-size:13.5px;font-weight:600;border:1px solid transparent;white-space:nowrap}
   .st.agendado{background:var(--st-agendado);border-color:var(--st-agendado-line);color:#dbe8ff}
   .st.realizado{background:var(--st-realizado);border-color:var(--st-realizado-line);color:#dcfff0}
   .st.fup{background:var(--st-fup);border-color:var(--st-fup-line);color:#ffe6cf}
@@ -124,7 +135,14 @@
 <body>
   <main class="page hidden" id="app">
     <div class="top">
-      <div class="title-wrap"><h1>Agendamentos</h1><span class="ro-pill">somente leitura</span></div>
+      <div class="title-wrap"><h1>Agendamentos</h1><span class="ro-pill">somente leitura</span>
+        <button class="refresh-btn" id="viewerRefresh" type="button" title="Atualizar página" aria-label="Atualizar página">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+          </svg>
+        </button>
+      </div>
       <div class="updated"><span class="dot" aria-hidden="true"></span><span id="updated-at"></span></div>
     </div>
     <div id="plans"></div>
@@ -147,7 +165,7 @@
     </div>
   </div>
 
-  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"nbGJUPe3+7DYnHh9CKO4Pw==","iv":"1RyVh4+r7vUd+AYr","ct":"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"}</script>
+  <script id="enc" type="application/json">{"v":1,"kdf":"PBKDF2-SHA256","iter":210000,"salt":"t8JI1ZMnrQa7yD7dD59ywg==","iv":"wEySiM1HoZYGLmUr","ct":"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"}</script>
   <script>
   (function(){
     "use strict";
@@ -250,6 +268,9 @@
       err.textContent="Seu navegador não suporta a descriptografia (use HTTPS).";
     }
     form.addEventListener("submit", function(e){ e.preventDefault(); if(input.value) attempt(input.value,false); });
+
+    var refreshBtn=document.getElementById("viewerRefresh");
+    if(refreshBtn) refreshBtn.addEventListener("click", function(){ location.reload(); });
 
     var saved=null; try{ saved=localStorage.getItem(LS_KEY); }catch(e){}
     if(saved){ if(remember) remember.checked=true; attempt(saved,true); }
